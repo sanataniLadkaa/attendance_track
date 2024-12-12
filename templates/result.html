@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QR Code Scanner Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        .result-container {
+            display: inline-block;
+            text-align: left;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            max-width: 500px;
+        }
+        .status {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .verified {
+            color: green;
+        }
+        .not-verified, .error {
+            color: red;
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ccc;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="result-container">
+        <p class="status {{ status_class }}">{{ status }}</p>
+        <p>{{ message }}</p>
+        {% if scanned_image %}
+        <div class="image-container">
+            <p>Scanned QR Code Image:</p>
+            <img src="{{ scanned_image }}" alt="Scanned QR Code">
+        </div>
+        {% endif %}
+    </div>
+    <a href="/">Back to Scanner</a>
+</body>
+</html>

@@ -1,1 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>QR Code Verification</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .verification-section {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .section {
+            width: 45%;
+            border: 1px solid #ddd;
+            padding: 15px;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .verified {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .not-verified {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+    </style>
+</head>
+<body>
+    <h1>QR Code Verification</h1>
+    
+    <div class="verification-section">
+        <div class="section">
+            <h2>Scan from Camera</h2>
+            <button onclick="scanCamera()">Scan QR Code</button>
+            <div id="cameraScanResult"></div>
+        </div>
 
+        <div class="section">
+            <h2>Upload QR Code Image</h2>
+            <input type="file" id="qrFileUpload" accept="image/*">
+            <button onclick="verifyQRCode()">Verify QR Code</button>
+        </div>
+    </div>
+
+    <div id="result"></div>
+
+    <script>
+        async function scanCamera() {
+            const cameraScanResultDiv = document.getElementById('cameraScanResult');
+            const resultDiv = document.getElementById('result');
+
+            try {
+                const response = await axios.post('/scan-camera');
+                
+                if (response.data.qr_code) {
+                    cameraScanResultDiv.innerHTML = `Scanned QR Code: ${response.data.qr_code}`;
+                    cameraScanResultDiv.style.color = 'green';
+                } else {
+                    cameraScanResultDiv.innerHTML = 'No QR code detected';
+                    cameraScanResultDiv.style.color = 'red';
+                }
+            } catch (error) {
+                console.error('Error scanning camera:', error);
+                cameraScanResultDiv.innerHTML = 'Error scanning camera';
+                cameraScanResultDiv.style.color = 'red';
+            }
+        }
+
+        async function verifyQRCode() {
+            const fileInput = document.getElementById('qrFileUpload');
+            const resultDiv = document.getElementById('result');
+
+            if (!fileInput.files.length) {
+                resultDiv.innerHTML = 'Please select a file';
+                resultDiv.className = 'not-verified';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const response = await axios.post('/verify-qr', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+
+                if (response.data.verified) {
+                    resultDiv.innerHTML = response.data.message;
+                    resultDiv.className = 'verified';
+                } else {
+                    resultDiv.innerHTML = response.data.message;
+                    resultDiv.className = 'not-verified';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = error.response?.data?.message || 'An unexpected error occurred';
+                resultDiv.className = 'not-verified';
+            }
+        }
+    </script>
+</body>
+</html>
